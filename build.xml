@@ -1,0 +1,79 @@
+<project name="HibernateHello" basedir="." default="clean-build-run" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+    <target name="resolve" depends="init-ivy" description="--> retreive dependencies with ivy">
+        <ivy:retrieve pattern="${ivy.lib.dir}/[conf]/[artifact]-[type]-[revision].[ext]"/>
+    </target>
+
+    <property name="build.dir" value="build" />
+    <property name="deps.dir" value="dependencies" />
+    <property name="libs.dir" value="lib" />
+    <property name="classes.dir" value="${build.dir}/classes" />
+
+    <property name="log4j-jar" value="${deps.dir}/log4j.jar"/>
+
+
+    <!-- install ivy -->
+    <property name="ivy.install.version" value="2.3.0" />
+    <condition property="ivy.home" value="${env.IVY_HOME}">
+        <isset property="env.IVY_HOME" />
+    </condition>
+    <property name="ivy.home" value="${user.home}/.ant" />
+    <property name="ivy.jar.dir" value="${ivy.home}/lib" />
+    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
+
+    <target name="download-ivy" unless="offline">
+
+        <mkdir dir="${ivy.jar.dir}"/>
+        <get src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
+             dest="${ivy.jar.file}" usetimestamp="true"/>
+    </target>
+
+    <target name="init-ivy" depends="download-ivy">
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml"
+                 uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+    </target>
+
+
+    <target name="clean" depends="init-ivy">
+        <ivy:cleancache />
+        <delete dir="build" />
+        <delete dir="${libs.dir}" />
+        <delete dir="${deps.dir}" />
+        <delete dir="${ivy.jar.dir}"/>
+    </target>
+
+    <target name="init" depends="resolve">
+        <mkdir dir="${libs.dir}" />
+        <mkdir dir="${deps.dir}" />
+        <mkdir dir="${ivy.jar.dir}"/>
+        <mkdir dir="${classes.dir}" />
+    </target>
+
+    <target name="install-deps" depends="init">
+        <!--<echo message="installing aws java sdk..."/>-->
+        <!--<get src="http://sdk-for-java.amazonwebservices.com/latest/aws-java-sdk.zip"-->
+             <!--dest="${deps.dir}/aws-java-sdk.zip" />-->
+        <!--<unzip src="${deps.dir}/aws-java-sdk.zip" dest="${libs.dir}">-->
+            <!--<patternset>-->
+                <!--<include name="**/*.jar" />-->
+            <!--</patternset>-->
+            <!--<mapper type="flatten" />-->
+        <!--</unzip>-->
+    </target>
+
+    <target name="build" depends="install-deps">
+
+    </target>
+
+    <target name="run">
+
+    </target>
+
+    <target name="clean-build-run" depends="clean,build,run">
+
+    </target>
+</project>

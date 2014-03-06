@@ -1,5 +1,10 @@
 *.class
 
+# IDE Files #
+*.iml
+.idea
+src/com/tservice/
+
 # Package Files #
 *.jar
 *.war
