@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="EC2 Test Suite">
+  <test name="EC2_Tests">
+    <classes>
+      <class name="com.eucaws.s3.S3TestCasesSuite.TestBucketPutGetDelete" />
+      <class name="com.eucaws.s3.S3TestCasesSuite.TestObjectPutGetDelete" />
+    </classes>
+  </test>
+</suite>
