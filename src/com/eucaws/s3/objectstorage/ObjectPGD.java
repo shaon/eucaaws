@@ -27,7 +27,7 @@ public class ObjectPGD {
     Multimap<String, String> bucketObjectList = tester.s3.putObjectsTest( );
 
     System.out.println( "\nStarting GET object test..." );
-    Set<String> keys = bucketObjectList.keySet();
+    Set<String> keys = bucketObjectList.keySet( );
 
     String bucketName = null;
     List<String> keyNames = null;

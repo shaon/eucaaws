@@ -26,6 +26,8 @@ import java.util.Set;
 import com.github.sjones4.youcan.youare.YouAre;
 import com.github.sjones4.youcan.youare.YouAreClient;
 
+import static org.testng.Assert.assertTrue;
+
 public class SimpleStorageService {
 
   public static Logger LOG = Logger.getLogger( SimpleStorageService.class.getCanonicalName( ) );
@@ -47,7 +49,7 @@ public class SimpleStorageService {
   public Bucket createBucket( String bucketName ) {
     LOG.info( "Creating bucket: " + bucketName );
     Bucket bucket = s3Client.createBucket( bucketName );
-    assert s3Client.doesBucketExist( bucketName ): "Bucket '" + bucketName + "' was not found.";
+    assertTrue( s3Client.doesBucketExist( bucketName ), "Bucket '" + bucketName + "' was not found." );
     return bucket;
   }
 
@@ -271,7 +273,7 @@ public class SimpleStorageService {
       if ( ignoreFiles.contains( file.getName( ) ) ) continue;
       isNewFile = false;
       try {
-        S3Object s3Object = s3Client.getObject( bucketName, file.getName() );
+        S3Object s3Object = s3Client.getObject( bucketName, file.getName( ) );
         if ( !s3Object.getObjectMetadata( ).getETag( ).equals( getCheckSum( file ) ) ) {
           LOG.info( "M\t" + file.getAbsolutePath( ) );
           deleteObject( bucketName, s3Object.getKey( ) );
@@ -298,6 +300,11 @@ public class SimpleStorageService {
     File file = new File( filePath );
     LOG.info( "Putting object: " + file.getAbsolutePath( ) + " into bucket: " + bucketName );
     PutObjectResult putObjectResult = s3Client.putObject( new PutObjectRequest( bucketName, file.getName(), file ) );
+    S3Object s3Object = s3Client.getObject( bucketName, file.getName( ) );
+    LOG.info( "CSum: " + getCheckSum( file ) );
+    LOG.info( "Etag: " + s3Object.getObjectMetadata( ).getETag( ) );
+    assertTrue( s3Object.getObjectMetadata().getETag().equals( getCheckSum( file ) ),
+            "Object metadata Etag and local file checksum did not match." );
     return putObjectResult;
   }
 
@@ -309,7 +316,6 @@ public class SimpleStorageService {
     Bucket bucket = createBucket( "eucaaws-test-" + System.currentTimeMillis( ) );
     List<String> textObjects = createTextObjects( number );
     for ( String textObj : textObjects ) {
-      LOG.info( textObj );
       String scrDirectoryName = "srcobjects/";
       putObjectIntoBucket( bucket.getName( ), scrDirectoryName + textObj );
     }
@@ -338,6 +344,7 @@ public class SimpleStorageService {
           writer.close( );
         } catch ( Exception ex ) { }
       }
+      LOG.info( "Created text file: " + filename );
       resources.add( filename );
     }
     return resources;
@@ -375,7 +382,12 @@ public class SimpleStorageService {
     String destDirectory = "destobjects/";
     for ( String keyName : keyNames ) {
       LOG.info( "Downloading key '" + keyName + "' " + "from " + "'" + bucketName + "' " + "to " + destDirectory.replace( '/', ' ' ) );
-      s3Client.getObject( new GetObjectRequest( bucketName, keyName ), new File( destDirectory + keyName ) );
+      File file = new File( destDirectory + keyName );
+      ObjectMetadata s3ObjectMetadata = s3Client.getObject( new GetObjectRequest( bucketName, keyName ), file );
+      String localFileCheckSum = getCheckSum( file );
+      LOG.info( "Etag: " + s3ObjectMetadata.getETag( ) );
+      LOG.info( "CSum: " + localFileCheckSum );
+      assertTrue( localFileCheckSum.equals( s3ObjectMetadata.getETag( ) ), "Downloaded file's checksum doesn't match with Etag." );
     }
   }
 
