@@ -3,10 +3,6 @@ package com.eucaws.s3.objectstorage;
 import com.amazonaws.services.s3.model.Bucket;
 import com.tester.EucaTester;
 import org.apache.log4j.PropertyConfigurator;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class BucketPGD {
@@ -17,7 +13,7 @@ public class BucketPGD {
     EucaTester tester = new EucaTester( "eucarc" );
 
     System.out.println( "\nStarting CREATE bucket test..." );
-    List<Bucket> buckets = tester.s3.createBucketTest( 1 );
+    List<Bucket> buckets = tester.s3.createBucketTest(  );
 
     System.out.println( "\nStarting LIST bucket test..." );
     tester.s3.listBuckets( );

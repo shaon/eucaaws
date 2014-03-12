@@ -47,6 +47,7 @@ public class SimpleStorageService {
   public Bucket createBucket( String bucketName ) {
     LOG.info( "Creating bucket: " + bucketName );
     Bucket bucket = s3Client.createBucket( bucketName );
+    assert s3Client.doesBucketExist( bucketName ): "Bucket '" + bucketName + "' was not found.";
     return bucket;
   }
 
