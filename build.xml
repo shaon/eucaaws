@@ -1,4 +1,4 @@
-<project name="HibernateHello" basedir="." default="clean-build-run" xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="eucaaws" basedir="." default="clean-build-run" xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <target name="resolve" depends="init-ivy" description="--> retreive dependencies with ivy">
         <ivy:retrieve pattern="${ivy.lib.dir}/[conf]/[artifact]-[type]-[revision].[ext]"/>
