@@ -34,7 +34,7 @@ public class TestBucketPutGetDelete {
       try {
         Bucket bucket = tester.s3.createBucket( bucketNames[i] );
       } catch ( Exception ex ) {
-        System.out.println( "\nFailed to create bucket: '" + bucketNames[i] + "' Caught exception: " + ex.toString() );
+        System.out.println( "\nCorrectly Caught exception: " + ex.toString( ) );
         e = ex;
       }
       assertTrue( e instanceof IllegalArgumentException );
