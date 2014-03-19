@@ -68,6 +68,13 @@
     </target>
 
     <target name="build" depends="install-deps">
+        <mkdir dir="${classes.dir}"/>
+        <javac includeantruntime="false" srcdir="${source.dir}" destdir="${classes.dir}" classpathref="classpath"/>
+        <copy file="log4j.properties" todir="${classes.dir}"/>
+
+        <mkdir dir="build/jar"/>
+        <jar destfile="build/jar/eucatester-${version}.jar" basedir="build/classes" />
+        <jar destfile="build/jar/eucatester-source-${version}.jar" basedir="${source.dir}" />
 
     </target>
 
