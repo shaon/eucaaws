@@ -1,16 +1,26 @@
-<project name="eucaaws" basedir="." default="clean-build-run" xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="eucatester" basedir="." default="clean-build-run" xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <target name="resolve" depends="init-ivy" description="--> retreive dependencies with ivy">
         <ivy:retrieve pattern="${ivy.lib.dir}/[conf]/[artifact]-[type]-[revision].[ext]"/>
     </target>
 
+    <property name="version" value="1.0.0" />
+    <property name="source.dir" value="src" />
     <property name="build.dir" value="build" />
-    <property name="deps.dir" value="dependencies" />
+    <property name="doc.dir" value="doc" />
+    <property name="deps.dir" value="lib/default" />
     <property name="libs.dir" value="lib" />
     <property name="classes.dir" value="${build.dir}/classes" />
 
     <property name="log4j-jar" value="${deps.dir}/log4j.jar"/>
 
+    <!-- set classpath to include dependencies and build output -->
+    <path id="classpath">
+        <fileset dir="${deps.dir}">
+            <include name="*.jar"/>
+        </fileset>
+        <pathelement path="${classes.dir}"/>
+    </path>
 
     <!-- install ivy -->
     <property name="ivy.install.version" value="2.3.0" />
@@ -54,19 +64,32 @@
     </target>
 
     <target name="install-deps" depends="init">
-        <!--<echo message="installing aws java sdk..."/>-->
-        <!--<get src="http://sdk-for-java.amazonwebservices.com/latest/aws-java-sdk.zip"-->
-             <!--dest="${deps.dir}/aws-java-sdk.zip" />-->
-        <!--<unzip src="${deps.dir}/aws-java-sdk.zip" dest="${libs.dir}">-->
-            <!--<patternset>-->
-                <!--<include name="**/*.jar" />-->
-            <!--</patternset>-->
-            <!--<mapper type="flatten" />-->
-        <!--</unzip>-->
+
     </target>
 
     <target name="build" depends="install-deps">
 
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac includeantruntime="false" srcdir="${source.dir}" destdir="${classes.dir}" classpathref="classpath"/>
+        <copy file="log4j.properties" todir="${classes.dir}"/>
+    </target>
+
+    <target name="build-jar" depends="compile">
+        <mkdir dir="build/jar"/>
+        <jar destfile="build/jar/eucatester-${version}.jar" basedir="build/classes" />
+        <jar destfile="build/jar/eucatester-source-${version}.jar" basedir="${source.dir}" />
+    </target>
+
+    <target name="doc" depends="init" description="generate documentation">
+        <mkdir dir="${doc.dir}"/>
+        <javadoc sourcepath="${source.dir}" destdir="${doc.dir}"/>
+    </target>
+
+    <target name="clean-build">
+        <delete dir="build" />
     </target>
 
     <target name="run">
