@@ -7,13 +7,13 @@ import org.apache.log4j.PropertyConfigurator;
 public class BucketACLs {
 
   public static void main( String[] args ) {
-
     PropertyConfigurator.configure( "log4j.properties" );
 
     EucaTester tester = new EucaTester( "eucarc" );
 
     String bucketName = "yetanotherbucketfromhulk1";
-//    tester.s3.listBuckets();
+    tester.s3.createBucket( bucketName );
     tester.s3Client.getBucketAcl( bucketName );
+    tester.s3.deleteBucket( bucketName );
   }
 }
