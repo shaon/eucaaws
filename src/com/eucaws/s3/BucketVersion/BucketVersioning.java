@@ -1,37 +1,43 @@
 package com.eucaws.s3.BucketVersion;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.S3ClientOptions;
-import com.amazonaws.services.s3.model.BucketVersioningConfiguration;
-import com.amazonaws.services.s3.model.SetBucketVersioningConfigurationRequest;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+import com.tester.EucaTester;
+import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.PutObjectResult;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
+
+import static org.testng.Assert.assertTrue;
+import org.apache.log4j.PropertyConfigurator;
+
+import java.io.File;
+import java.util.List;
 
 public class BucketVersioning {
-    static Logger logger = Logger.getLogger(BucketVersioning.class);
 
-    public static void main(String [] args) {
-        BasicConfigurator.configure();
+  public static void main( String[] args ) {
 
-        AmazonS3 walrus = new AmazonS3Client(new BasicAWSCredentials(
-                "XXXXXXXXXXXXXXXXXXXXXX",
-                "XXXXXXXXXXXXXXXXXXXXXX"
-        ));
-        walrus.setEndpoint("http://example.org:8773/services/Walrus/");
-        walrus.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
+    PropertyConfigurator.configure( "log4j.properties" );
 
-        SetBucketVersioningConfigurationRequest setBucketVersioningConfigurationRequest =
-                new SetBucketVersioningConfigurationRequest("hulk1admin1",
-                        new BucketVersioningConfiguration(BucketVersioningConfiguration.OFF));
+    EucaTester tester = new EucaTester( "eucarc" );
 
-        walrus.setBucketVersioningConfiguration(setBucketVersioningConfigurationRequest);
+    Bucket bucket = tester.s3.createBucket( tester.s3.getResourceName( "bucket" ) );
+    tester.s3.enableBucketVersioningConfiguration( bucket.getName( ) );
 
-        BucketVersioningConfiguration bucketVersioningConfiguration = walrus.getBucketVersioningConfiguration("hulk1admin1");
+    File file = tester.s3.getTextObjectFile( );
+    PutObjectResult putObjectResult1 = tester.s3.putObjectIntoBucket( bucket.getName( ), file.getAbsolutePath( ) );
 
-        System.out.println();
-        logger.debug("Bucket versioning is: " + bucketVersioningConfiguration.getStatus());
+    tester.s3.updateTextObjectFile( file );
+    PutObjectResult putObjectResult2 = tester.s3.putObjectIntoBucket( bucket.getName( ), file.getAbsolutePath( ) );
 
+    ObjectListing objectListing = tester.s3.listBucketObjects( bucket.getName( ) );
+    List<S3ObjectSummary> objectSummaries = objectListing.getObjectSummaries( );
+    for ( S3ObjectSummary objectSummary : objectSummaries ) {
+      assertTrue( objectSummary.getETag( ).equals( putObjectResult2.getETag( ) ) );
     }
+
+//    CleanUp
+    tester.s3.deleteAllObjectsFromVersionedBucket( bucket.getName( ) );
+    tester.s3.deleteBucket( bucket.getName( ) );
+
+  }
 }
