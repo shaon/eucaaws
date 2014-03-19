@@ -54,4 +54,26 @@ public class EucaTester extends EucaClients {
     ec2 = new ElasticComputeCloud( ec2Client );
   }
 
+  /********************************************************
+   * Someday the following methods will have a home class *
+   ********************************************************/
+
+  public void sleep( int second ) {
+    LOG.info( "Sleeping for " + second + " seconds. ");
+    try {
+      Thread.sleep( 1000 * second );
+    } catch ( InterruptedException e ) {
+      LOG.info( "w00t! I should not be here!!!!" );
+    }
+  }
+
+  public void sleep( int second, String message ) {
+    LOG.info( "Sleeping for " + second + " seconds. " + message );
+    try {
+      Thread.sleep( 1000 * second );
+    } catch ( InterruptedException e ) {
+      LOG.info( "w00t! I should not be here!!!!" );
+    }
+  }
+
 }
