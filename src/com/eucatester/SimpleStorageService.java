@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.google.common.collect.Multimap;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,6 +32,7 @@ public class SimpleStorageService {
   AmazonS3 s3Client;
 
   public SimpleStorageService( AmazonS3 s3Client ) {
+    PropertyConfigurator.configure( "log4j.properties" );
     this.s3Client = s3Client;
   }
 

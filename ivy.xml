@@ -1,7 +1,8 @@
 <ivy-module version="2.0">
-  <info organisation="com.eucaws" module="" />
+  <info organisation="com.eucalyptus" module="eutester-java-tdk" />
   <dependencies>
     <dependency org="log4j" name="log4j" rev="1.2.17"/>
+    <dependency org="com.jcraft" name="jsch" rev="0.1.49"/>
     <dependency org="org.testng" name="testng" rev="6.8.5"/>
     <dependency org="com.amazonaws" name="aws-java-sdk" rev="1.7.3"/>
     <dependency org="com.google.guava" name="guava" rev="12.0" />

@@ -1,6 +1,7 @@
 package com.eucatester;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import java.io.IOException;
 
@@ -54,16 +55,16 @@ public class EucaTester extends EucaClients {
     ec2 = new ElasticComputeCloud( ec2Client );
   }
 
-  /********************************************************
-   * Someday the following methods will have a home class *
-   ********************************************************/
+  /***************************
+   * tester helper functions *
+   ***************************/
 
   public void sleep( int second ) {
     LOG.info( "Sleeping for " + second + " seconds. ");
     try {
       Thread.sleep( 1000 * second );
     } catch ( InterruptedException e ) {
-      LOG.info( "w00t! I should not be here!!!!" );
+      LOG.warn( "w00t! I should not be here!!!!" );
     }
   }
 
@@ -72,7 +73,7 @@ public class EucaTester extends EucaClients {
     try {
       Thread.sleep( 1000 * second );
     } catch ( InterruptedException e ) {
-      LOG.info( "w00t! I should not be here!!!!" );
+      LOG.warn( "w00t! I should not be here!!!!" );
     }
   }
 

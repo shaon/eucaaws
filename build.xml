@@ -1,22 +1,18 @@
-<project name="eucatester" basedir="." default="clean-build-run" xmlns:ivy="antlib:org.apache.ivy.ant">
-
-    <target name="resolve" depends="init-ivy" description="--> retreive dependencies with ivy">
-        <ivy:retrieve pattern="${ivy.lib.dir}/[conf]/[artifact]-[type]-[revision].[ext]"/>
-    </target>
+<project name="eutester-java-tdk" basedir="." default="build" xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <property name="version" value="1.0.0" />
     <property name="source.dir" value="src" />
     <property name="build.dir" value="build" />
-    <property name="doc.dir" value="doc" />
-    <property name="deps.dir" value="lib/default" />
     <property name="libs.dir" value="lib" />
-    <property name="classes.dir" value="${build.dir}/classes" />
 
-    <property name="log4j-jar" value="${deps.dir}/log4j.jar"/>
+    <property name="jar.dir" value="${build.dir}/jar" />
+    <property name="doc.dir" value="${build.dir}/doc" />
+    <property name="classes.dir" value="${build.dir}/classes" />
+    <property name="log4j-jar" value="${libs.dir}/log4j.jar"/>
 
     <!-- set classpath to include dependencies and build output -->
     <path id="classpath">
-        <fileset dir="${deps.dir}">
+        <fileset dir="${libs.dir}">
             <include name="*.jar"/>
         </fileset>
         <pathelement path="${classes.dir}"/>
@@ -32,7 +28,6 @@
     <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
 
     <target name="download-ivy" unless="offline">
-
         <mkdir dir="${ivy.jar.dir}"/>
         <get src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
              dest="${ivy.jar.file}" usetimestamp="true"/>
@@ -41,69 +36,52 @@
     <target name="init-ivy" depends="download-ivy">
         <path id="ivy.lib.path">
             <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
-
         </path>
         <taskdef resource="org/apache/ivy/ant/antlib.xml"
                  uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
     </target>
 
-
-    <target name="clean" depends="init-ivy">
-        <ivy:cleancache />
-        <delete dir="build" />
-        <delete dir="${libs.dir}" />
-        <delete dir="${deps.dir}" />
-        <delete dir="${ivy.jar.dir}"/>
+    <target name="resolve" depends="init-ivy" description="--> retreive dependencies with ivy">
+        <ivy:retrieve conf="default" pattern="${libs.dir}/[artifact]-[type]-[revision].[ext]"/>
     </target>
 
-    <target name="init" depends="resolve">
+    <target name="install-deps" depends="resolve">
         <mkdir dir="${libs.dir}" />
-        <mkdir dir="${deps.dir}" />
-        <mkdir dir="${ivy.jar.dir}"/>
-        <mkdir dir="${classes.dir}" />
     </target>
 
-    <target name="install-deps" depends="init">
-
-    </target>
-
-    <target name="build" depends="install-deps">
-        <mkdir dir="${classes.dir}"/>
-        <javac includeantruntime="false" srcdir="${source.dir}" destdir="${classes.dir}" classpathref="classpath"/>
-        <copy file="log4j.properties" todir="${classes.dir}"/>
-
-        <mkdir dir="build/jar"/>
-        <jar destfile="build/jar/eucatester-${version}.jar" basedir="build/classes" />
-        <jar destfile="build/jar/eucatester-source-${version}.jar" basedir="${source.dir}" />
+    <target name="build" depends="install-deps, compile, build-jar, build-doc">
 
     </target>
 
     <target name="compile">
+        <mkdir dir="${build.dir}" />
         <mkdir dir="${classes.dir}"/>
         <javac includeantruntime="false" srcdir="${source.dir}" destdir="${classes.dir}" classpathref="classpath"/>
-        <copy file="log4j.properties" todir="${classes.dir}"/>
     </target>
 
     <target name="build-jar" depends="compile">
-        <mkdir dir="build/jar"/>
-        <jar destfile="build/jar/eucatester-${version}.jar" basedir="build/classes" />
-        <jar destfile="build/jar/eucatester-source-${version}.jar" basedir="${source.dir}" />
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/eutester-java-tdk-jar-${version}.jar" basedir="${classes.dir}" />
+        <jar destfile="${jar.dir}/eutester-java-tdk-source-${version}.jar" basedir="${source.dir}" />
     </target>
 
-    <target name="doc" depends="init" description="generate documentation">
+    <target name="build-doc" description="Generate Documentation">
         <mkdir dir="${doc.dir}"/>
-        <javadoc sourcepath="${source.dir}" destdir="${doc.dir}"/>
+        <javadoc sourcepath="${source.dir}" destdir="${doc.dir}" />
+        <jar compress="true" destfile="${jar.dir}/eutester-java-tdk-javadoc-${version}.jar" basedir="${doc.dir}" />
     </target>
 
     <target name="clean-build">
         <delete dir="build" />
     </target>
 
-    <target name="run">
-
+    <target name="clean-all" depends="clean-build">
+        <delete dir="${libs.dir}" />
     </target>
 
-    <target name="clean-build-run" depends="clean,build,run">
-
+    <target name="clean-dist" depends="init-ivy, clean-all" >
+        <ivy:cleancache />
+        <delete dir="${ivy.jar.dir}"/>
     </target>
+
 </project>

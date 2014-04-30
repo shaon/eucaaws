@@ -1,9 +1,12 @@
-*.class
+# Dependencies/Build directories #
+build/
+lib/
+*.log
+out/
 
 # IDE Files #
 *.iml
 .idea
-src/com/tservice/
 
 # Package Files #
 *.jar

@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.S3ClientOptions;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -33,35 +34,23 @@ public class EucaClients {
   String S3_ENDPOINT;
   String EC2_ENDPOINT;
 
-  /**
-   *
-   * @param file
-   */
-  private void getCredentials( File file ) {
-    try {
-    this.AWS_ACCESS_KEY = parseEucarc( file.getAbsolutePath( ), "AWS_ACCESS_KEY" ).replace( "'", "" );
-    this.AWS_SECRET_KEY = parseEucarc( file.getAbsolutePath( ), "AWS_SECRET_KEY" ).replace( "'", "" );
-    this.S3_ENDPOINT = parseEucarc( file.getAbsolutePath( ), "S3_URL" );
-    this.EC2_ENDPOINT = parseEucarc( file.getAbsolutePath( ), "EC2_URL" );
-    updateEndPoints( );
-    } catch ( IOException e ) {
-      e.printStackTrace();
-    }
-  }
+  public static Logger LOG = Logger.getLogger( EucaClients.class.getCanonicalName( ) );
 
   protected EucaClients( ) {
     new EucaClients( "eucarc" );
   }
 
   protected EucaClients( String AWS_ACCESS_KEY, String AWS_SECRET_KEY ) {
+    PropertyConfigurator.configure( "log4j.properties" );
     this.s3Client = new AmazonS3Client( new BasicAWSCredentials( AWS_ACCESS_KEY, AWS_SECRET_KEY ) );
     this.ec2Client = new AmazonEC2Client( new BasicAWSCredentials( AWS_ACCESS_KEY, AWS_SECRET_KEY ) );
   }
 
   protected EucaClients( String filePath ) {
-      getCredentials( new File ( filePath ) );
-      this.ec2Client = getEC2Client( this.AWS_ACCESS_KEY, this.AWS_SECRET_KEY, this.EC2_ENDPOINT );
-      this.s3Client = getS3Client( this.AWS_ACCESS_KEY, this.AWS_SECRET_KEY, this.S3_ENDPOINT );
+    PropertyConfigurator.configure( "log4j.properties" );
+    getCredentials( new File ( filePath ) );
+    this.ec2Client = getEC2Client( this.AWS_ACCESS_KEY, this.AWS_SECRET_KEY, this.EC2_ENDPOINT );
+    this.s3Client = getS3Client( this.AWS_ACCESS_KEY, this.AWS_SECRET_KEY, this.S3_ENDPOINT );
   }
 
   /**
@@ -71,6 +60,7 @@ public class EucaClients {
    * @param ENDPOINT
    */
   protected EucaClients( String AWS_ACCESS_KEY, String AWS_SECRET_KEY, String ENDPOINT ) {
+    PropertyConfigurator.configure( "log4j.properties" );
     this.ec2Client = getEC2Client( AWS_ACCESS_KEY, AWS_SECRET_KEY, constructEndpoint( ENDPOINT, "EC2" ) );
     this.s3Client = getS3Client( AWS_ACCESS_KEY, AWS_SECRET_KEY, constructEndpoint( ENDPOINT, "WALRUS" ) );
   }
@@ -83,6 +73,7 @@ public class EucaClients {
    * @param S3BACKEND - Available option: WALRUS, RIAKCS
    */
   protected EucaClients( String AWS_ACCESS_KEY, String AWS_SECRET_KEY, String ENDPOINT, String S3BACKEND ) {
+    PropertyConfigurator.configure( "log4j.properties" );
     this.ec2Client = getEC2Client( AWS_ACCESS_KEY, AWS_SECRET_KEY, constructEndpoint( ENDPOINT, "EC2" ) );
     this.s3Client = getS3Client( AWS_ACCESS_KEY, AWS_SECRET_KEY, constructEndpoint( ENDPOINT, S3BACKEND ) );
   }
@@ -94,14 +85,18 @@ public class EucaClients {
    * @return
    */
   private String constructEndpoint( String ENDPOINT, String service ) {
+    LOG.trace( "Constructing endpoints..." );
     service = service.toUpperCase();
+    String retEndpoint = "";
     if ( service.equals( "EC2" ) )
-      return "http://" + ENDPOINT + ":8773/services/Eucalyptus";
+      retEndpoint = "http://" + ENDPOINT + ":8773/services/Eucalyptus";
     else if ( service.equals( "WALRUS" ) )
-      return "http://" + ENDPOINT + ":8773/services/Walrus";
+      retEndpoint = "http://" + ENDPOINT + ":8773/services/Walrus";
     else if ( service.equals( "RIAKCS" ) )
-      return "http://" + ENDPOINT + ":8773/services/objectstorage";
-    else return null;
+      retEndpoint = "http://" + ENDPOINT + ":8773/services/objectstorage";
+
+    LOG.trace( "Created endpoint: " + retEndpoint );
+    return retEndpoint;
   }
 
   /**
@@ -133,6 +128,23 @@ public class EucaClients {
     AmazonEC2 ec2Client = new AmazonEC2Client(new BasicAWSCredentials( AWS_ACCESS_KEY, AWS_SECRET_KEY ) );
     ec2Client.setEndpoint( EC2_ENDPOINT );
     return ec2Client;
+  }
+
+  /**
+   *
+   * @param file
+   */
+  private void getCredentials( File file ) {
+    LOG.trace( "Parsing 'eucarc' file" );
+    try {
+      this.AWS_ACCESS_KEY = parseEucarc( file.getAbsolutePath( ), "AWS_ACCESS_KEY" ).replace( "'", "" );
+      this.AWS_SECRET_KEY = parseEucarc( file.getAbsolutePath( ), "AWS_SECRET_KEY" ).replace( "'", "" );
+      this.S3_ENDPOINT = parseEucarc( file.getAbsolutePath( ), "S3_URL" );
+      this.EC2_ENDPOINT = parseEucarc( file.getAbsolutePath( ), "EC2_URL" );
+      updateEndPoints( );
+    } catch ( IOException e ) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -171,7 +183,7 @@ public class EucaClients {
   }
 
   private void updateEndPoints( ) {
-    System.out.println( "updating endpoints.." );
+    LOG.debug( "Updating endpoints.xml file" );
     try {
       String endpointPath = "endpoints.xml";
       File xmlFile = new File( endpointPath );
@@ -203,10 +215,8 @@ public class EucaClients {
       transformer.transform( source, result );
 
     } catch ( Exception e ) {
-      System.out.println( e );
+      LOG.error( e );
     }
-    System.out.println( "done updating endpoints.." );
-
   }
 
 }
